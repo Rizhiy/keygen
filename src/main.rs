@@ -1,4 +1,4 @@
-#![feature(linked_list_extras)]
+#![feature(linked_list_cursors)]
 
 mod annealing;
 mod layout;

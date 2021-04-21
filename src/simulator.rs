@@ -180,10 +180,10 @@ fn list_insert_ordered(
 ) -> LinkedList<BestLayoutsEntry> {
   {
     // Find where to add our new entry to, since the list is sorted.
-    let mut iter = list.iter_mut();
+    let mut iter = list.iter_mut().peekable();
     loop {
       {
-        let opt_next = iter.peek_next();
+        let opt_next = iter.peek();
         if let Some(next) = opt_next {
           let cmp = entry.cmp(next);
           if cmp == Ordering::Less {
@@ -198,7 +198,7 @@ fn list_insert_ordered(
     }
 
     // Add to list.
-    iter.insert_next(entry);
+    list.push_back(entry);
   }
   list
 }
