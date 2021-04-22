@@ -199,10 +199,5 @@ fn list_insert_ordered(
     // Add to list.
     cursor.insert_before(entry);
   }
-  let list_clone = list.iter().clone();
-  println!(
-    "AFTER {:?}",
-    list_clone.map(|e| e.penalty).collect::<Vec<_>>()
-  );
   list
 }
