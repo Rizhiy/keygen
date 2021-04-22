@@ -10,13 +10,25 @@ use std::fmt;
 
 // KeyMap format:
 //    LEFT HAND   |    RIGHT HAND
+// 0 1 2 3  4  5  |  6 7 8 9 10 11 12
+// 13 14 15 16 17 | 18 19 20 21 22 23
+// 24 25 26 27 28 | 29 30 31 32 33 34
+// 35 36 37 38 39 | 40 41 42 43 44
+//             45 | 46 (thumb keys)
+// KeyMap format:
+//    LEFT HAND   |    RIGHT HAND
 //  0  1  2  3  4 |  5  6  7  8  9 10
 // 11 12 13 14 15 | 16 17 18 19 20 21
 // 22 23 24 25 26 | 27 28 29 30 31
 //
-//             32 | 33 (thumb keys)
+//    LEFT HAND   |    RIGHT HAND
+// ` 1 2 3  4  5  |  6 7 8 9 0  -  =
+// q  w  e  r  t  | y  u  i  o  p  [
+// a  s  d  f  g  | h  j  k  l  ;  '
+// z  x  c  v  b  | n  m  ,  .  /
+//             <s> | <s> (thumb keys)
 
-pub struct KeyMap<T>(pub [T; 34]);
+pub struct KeyMap<T>(pub [T; 47]);
 
 impl<T: Copy> Clone for KeyMap<T> {
   fn clone(&self) -> KeyMap<T> {
@@ -58,6 +70,7 @@ pub enum Hand {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Row {
+  Number,
   Top,
   Home,
   Bottom,
@@ -80,28 +93,32 @@ pub struct KeyPress {
 
 pub static INIT_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'j', 'c', 'y', 'f', 'k', 'z', 'l', ',', 'u', 'q', '=', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'j', 'c', 'y', 'f', 'k', 'z', 'l', ',', 'u', 'q', '[', //
     'r', 's', 't', 'h', 'd', 'm', 'n', 'a', 'i', 'o', '\'', //
-    '/', 'v', 'g', 'p', 'b', 'x', 'w', '.', ';', '-', //
+    '/', 'v', 'g', 'p', 'b', 'x', 'w', '.', ';', ']', //
     'e', ' ',
   ])), //
   Layer(KeyMap([
-    'J', 'C', 'Y', 'F', 'K', 'Z', 'L', '<', 'U', 'Q', '+', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'J', 'C', 'Y', 'F', 'K', 'Z', 'L', '<', 'U', 'Q', '{', //
     'R', 'S', 'T', 'H', 'D', 'M', 'N', 'A', 'I', 'O', '"', //
-    '?', 'V', 'G', 'P', 'B', 'X', 'W', '>', ':', '_', //
+    '?', 'V', 'G', 'P', 'B', 'X', 'W', '>', ':', '}', //
     'E', ' ',
   ])),
 ); //
 
 pub static QWERTY_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '-', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', //
     'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', //
     'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '_', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', //
     'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', //
     'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', //
     '\0', ' ',
@@ -110,12 +127,14 @@ pub static QWERTY_LAYOUT: Layout = Layout(
 
 pub static DVORAK_LAYOUT: Layout = Layout(
   Layer(KeyMap([
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '[', ']', //
     '\'', ',', '.', 'p', 'y', 'f', 'g', 'c', 'r', 'l', '/', //
     'a', 'o', 'e', 'u', 'i', 'd', 'h', 't', 'n', 's', '-', //
     ';', 'q', 'j', 'k', 'x', 'b', 'm', 'w', 'v', 'z', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}', //
     '"', ',', '.', 'P', 'Y', 'F', 'G', 'C', 'R', 'L', '?', //
     'A', 'O', 'E', 'U', 'I', 'D', 'H', 'T', 'N', 'S', '_', //
     ':', 'Q', 'J', 'K', 'X', 'B', 'M', 'W', 'V', 'Z', //
@@ -125,13 +144,15 @@ pub static DVORAK_LAYOUT: Layout = Layout(
 
 pub static COLEMAK_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y', ';', '-', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'q', 'w', 'f', 'p', 'g', 'j', 'l', 'u', 'y', ';', '[', //
     'a', 'r', 's', 't', 'd', 'h', 'n', 'e', 'i', 'o', '\'', //
     'z', 'x', 'c', 'v', 'b', 'k', 'm', ',', '.', '/', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'W', 'F', 'P', 'G', 'J', 'L', 'U', 'Y', ':', '_', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'Q', 'W', 'F', 'P', 'G', 'J', 'L', 'U', 'Y', ':', '{', //
     'A', 'R', 'S', 'T', 'D', 'H', 'N', 'E', 'I', 'O', '"', //
     'Z', 'X', 'C', 'V', 'B', 'K', 'M', '<', '>', '?', //
     '\0', ' ',
@@ -140,13 +161,15 @@ pub static COLEMAK_LAYOUT: Layout = Layout(
 
 pub static QGMLWY_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'g', 'm', 'l', 'w', 'y', 'f', 'u', 'b', ';', '-', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'q', 'g', 'm', 'l', 'w', 'y', 'f', 'u', 'b', ';', '[', //
     'd', 's', 't', 'n', 'r', 'i', 'a', 'e', 'o', 'h', '\'', //
     'z', 'x', 'c', 'v', 'j', 'k', 'p', ',', '.', '/', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'G', 'M', 'L', 'W', 'Y', 'F', 'U', 'B', ':', '_', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'Q', 'G', 'M', 'L', 'W', 'Y', 'F', 'U', 'B', ':', '{', //
     'D', 'S', 'T', 'N', 'R', 'I', 'A', 'E', 'O', 'H', '"', //
     'Z', 'X', 'C', 'V', 'J', 'K', 'P', '<', '>', '?', //
     '\0', ' ',
@@ -155,13 +178,15 @@ pub static QGMLWY_LAYOUT: Layout = Layout(
 
 pub static WORKMAN_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p', ';', '-', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'q', 'd', 'r', 'w', 'b', 'j', 'f', 'u', 'p', ';', '[', //
     'a', 's', 'h', 't', 'g', 'y', 'n', 'e', 'o', 'i', '\'', //
     'z', 'x', 'm', 'c', 'v', 'k', 'l', ',', '.', '/', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'D', 'R', 'W', 'B', 'J', 'F', 'U', 'P', ':', '_', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'Q', 'D', 'R', 'W', 'B', 'J', 'F', 'U', 'P', ':', '{', //
     'A', 'S', 'H', 'T', 'G', 'Y', 'N', 'E', 'O', 'I', '"', //
     'Z', 'X', 'M', 'C', 'V', 'K', 'L', '<', '>', '?', //
     '\0', ' ',
@@ -170,13 +195,15 @@ pub static WORKMAN_LAYOUT: Layout = Layout(
 
 pub static MALTRON_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'p', 'y', 'c', 'b', 'v', 'm', 'u', 'z', 'l', '=', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', //
+    'q', 'p', 'y', 'c', 'b', 'v', 'm', 'u', 'z', 'l', ']', //
     'a', 'n', 'i', 's', 'f', 'd', 't', 'h', 'o', 'r', '\'', //
     ',', '.', 'j', 'g', '/', ';', 'w', 'k', '-', 'x', //
     'e', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'P', 'Y', 'C', 'B', 'V', 'M', 'U', 'Z', 'L', '+', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', //
+    'Q', 'P', 'Y', 'C', 'B', 'V', 'M', 'U', 'Z', 'L', '}', //
     'A', 'N', 'I', 'S', 'F', 'D', 'T', 'H', 'O', 'R', '"', //
     '<', '>', 'J', 'G', '?', ':', 'W', 'K', '_', 'X', //
     'E', ' ',
@@ -185,27 +212,31 @@ pub static MALTRON_LAYOUT: Layout = Layout(
 
 pub static MTGAP_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'y', 'p', 'o', 'u', '-', 'b', 'd', 'l', 'c', 'k', 'j', //
-    'i', 'n', 'e', 'a', ',', 'm', 'h', 't', 's', 'r', 'v', //
-    '(', '"', '\'', '.', '_', ')', 'f', 'w', 'g', 'x', //
+    '\\', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q', 'z', //
+    'y', 'p', 'o', 'u', '-', 'k', 'd', 'l', 'c', 'w', 'x', //
+    'i', 'n', 'e', 'a', ',', 'm', 'h', 't', 's', 'r', '"', //
+    '(', ')', '\'', '.', '_', 'b', 'f', 'g', 'v', 'j', //
     'z', ' ',
   ])), //
   Layer(KeyMap([
-    'Y', 'P', 'O', 'U', ':', 'B', 'D', 'L', 'C', 'K', 'J', //
-    'I', 'N', 'E', 'A', ';', 'M', 'H', 'T', 'S', 'R', 'V', //
-    '&', '?', '*', '=', '<', '>', 'F', 'W', 'G', 'X', //
-    'Z', ' ',
+    '^', '~', '[', '{', '<', '|', '#', '>', '}', ']', '%', '_', '+', //
+    'Y', 'P', 'O', 'U', '=', 'K', 'D', 'L', 'C', 'W', 'X', //
+    'I', 'N', 'E', 'A', ':', 'M', 'H', 'T', 'S', 'R', '~', //
+    '`', '?', '*', ';', '&', 'B', 'F', 'G', 'V', 'J', //
+    '\0', ' ',
   ])),
 ); //
 
 pub static CAPEWELL_LAYOUT: Layout = Layout(
   Layer(KeyMap([
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '[', ']', //
     '.', 'y', 'w', 'd', 'f', 'j', 'p', 'l', 'u', 'q', '/', //
     'a', 'e', 'r', 's', 'g', 'b', 't', 'n', 'i', 'o', '-', //
     'x', 'z', 'c', 'v', ';', 'k', 'w', 'h', ',', '\'', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '{', '}', //
     '>', 'Y', 'W', 'D', 'F', 'J', 'P', 'L', 'U', 'Q', '?', //
     'A', 'E', 'R', 'S', 'G', 'B', 'T', 'N', 'I', 'O', '_', //
     'X', 'Z', 'C', 'V', ':', 'K', 'W', 'H', '<', '"', //
@@ -215,14 +246,16 @@ pub static CAPEWELL_LAYOUT: Layout = Layout(
 
 pub static ARENSITO_LAYOUT: Layout = Layout(
   Layer(KeyMap([
-    'q', 'l', ',', 'p', '\0', '\0', 'f', 'u', 'd', 'k', '\0', //
-    'a', 'r', 'e', 'n', 'b', 'g', 's', 'i', 't', 'o', '\0', //
+    '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '/', '=', //
+    'q', 'l', ',', 'p', '\'', ';', 'f', 'u', 'd', 'k', '[', //
+    'a', 'r', 'e', 'n', 'b', 'g', 's', 'i', 't', 'o', '-', //
     'z', 'w', '.', 'h', 'j', 'v', 'c', 'y', 'm', 'x', //
     '\0', ' ',
   ])), //
   Layer(KeyMap([
-    'Q', 'L', '<', 'P', '\0', '\0', 'F', 'U', 'D', 'K', '\0', //
-    'A', 'R', 'E', 'N', 'B', 'G', 'S', 'I', 'T', 'O', '\0', //
+    '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '?', '+', //
+    'Q', 'L', '<', 'P', '"', ':', 'F', 'U', 'D', 'K', '{', //
+    'A', 'R', 'E', 'N', 'B', 'G', 'S', 'I', 'T', 'O', '_', //
     'Z', 'W', '>', 'H', 'J', 'V', 'C', 'Y', 'M', 'X', //
     '\0', ' ',
   ])),
@@ -233,15 +266,31 @@ pub static ARENSITO_LAYOUT: Layout = Layout(
 // 	true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,
 // 	true,  true,  true,  true,  true,  true,  true,  true,  true,  true,
 // 	false]));
-static LAYOUT_MASK_SWAP_OFFSETS: [usize; 33] = [
+
+static LAYOUT_MASK_SWAP_OFFSETS: [usize; 46] = [
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //
   1, 1,
-]; //
-static LAYOUT_MASK_NUM_SWAPPABLE: usize = 33;
+];
+
+static LAYOUT_MASK_NUM_SWAPPABLE: usize = 46;
 
 static KEY_FINGERS: KeyMap<Finger> = KeyMap([
+  Finger::Pinky,
+  Finger::Pinky,
+  Finger::Ring,
+  Finger::Middle,
+  Finger::Index,
+  Finger::Index,
+  Finger::Index,
+  Finger::Index,
+  Finger::Middle,
+  Finger::Ring,
+  Finger::Pinky,
+  Finger::Pinky,
+  Finger::Pinky, //
   Finger::Pinky,
   Finger::Ring,
   Finger::Middle,
@@ -283,6 +332,19 @@ static KEY_HANDS: KeyMap<Hand> = KeyMap([
   Hand::Left,
   Hand::Left,
   Hand::Left,
+  Hand::Left,
+  Hand::Right,
+  Hand::Right,
+  Hand::Right,
+  Hand::Right,
+  Hand::Right,
+  Hand::Right,
+  Hand::Right, //
+  Hand::Left,
+  Hand::Left,
+  Hand::Left,
+  Hand::Left,
+  Hand::Left,
   Hand::Right,
   Hand::Right,
   Hand::Right,
@@ -314,6 +376,19 @@ static KEY_HANDS: KeyMap<Hand> = KeyMap([
   Hand::Right,
 ]); //
 static KEY_ROWS: KeyMap<Row> = KeyMap([
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number,
+  Row::Number, //
   Row::Top,
   Row::Top,
   Row::Top,
@@ -350,6 +425,7 @@ static KEY_ROWS: KeyMap<Row> = KeyMap([
   Row::Thumb,
 ]); //
 static KEY_CENTER_COLUMN: KeyMap<bool> = KeyMap([
+  false, false, false, false, false, true, true, false, false, false, false, false, false, //
   false, false, false, false, true, true, false, false, false, false, false, //
   false, false, false, false, true, true, false, false, false, false, false, //
   false, false, false, false, true, true, false, false, false, false, //
@@ -358,10 +434,21 @@ static KEY_CENTER_COLUMN: KeyMap<bool> = KeyMap([
 
 pub static KP_NONE: Option<KeyPress> = None;
 
+//    LEFT HAND   |    RIGHT HAND
+//  0  1  2  3  4 |  5  6  7  8  9 10
+// 11 12 13 14 15 | 16 17 18 19 20 21
+// 22 23 24 25 26 | 27 28 29 30 31
+
+// 0 1 2 3  4  5  |  6 7 8 9 10 11 12
+// 13 14 15 16 17 | 18 19 20 21 22 23
+// 24 25 26 27 28 | 29 30 31 32 33 34
+// 35 36 37 38 39 | 40 41 42 43 44
+//             45 | 46 (thumb keys)
 static LAYOUT_FILE_IDXS: KeyMap<usize> = KeyMap([
-  0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, //
-  13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, //
-  26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38,
+  0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, //
+  15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, //
+  28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39, //
+  41, 42, 43, 44, 45, 47, 48, 49, 50, 51, 52, 53, //
 ]); //
 
 /* ----- *
@@ -371,10 +458,10 @@ static LAYOUT_FILE_IDXS: KeyMap<usize> = KeyMap([
 impl Layout {
   pub fn from_string(s: &str) -> Layout {
     let s: Vec<char> = s.chars().collect();
-    let mut lower: [char; 34] = ['\0'; 34];
-    let mut upper: [char; 34] = ['\0'; 34];
+    let mut lower: [char; 47] = ['\0'; 47];
+    let mut upper: [char; 47] = ['\0'; 47];
 
-    for i in 0..34 {
+    for i in 0..47 {
       let file_i = LAYOUT_FILE_IDXS.0[i];
       lower[i] = *s.get(file_i).unwrap_or(&'\0');
       upper[i] = *s.get(file_i + 40).unwrap_or(&'\0');
@@ -529,10 +616,11 @@ impl fmt::Display for Layer {
     let Layer(KeyMap(ref layer)) = *self;
     write!(
       f,
-      "{} {} {} {} {} | {} {} {} {} {} {}
-{} {} {} {} {} | {} {} {} {} {} {}
-{} {} {} {} {} | {} {} {} {} {}
-        {} | {}",
+      "{} {} {} {} {} {} | {} {} {} {} {} {} {}
+  {} {} {} {} {} | {} {} {} {} {} {}
+  {} {} {} {} {} | {} {} {} {} {} {}
+  {} {} {} {} {} | {} {} {} {} {}
+          {} | {}",
       layer[0],
       layer[1],
       layer[2],
@@ -566,7 +654,20 @@ impl fmt::Display for Layer {
       layer[30],
       layer[31],
       layer[32],
-      layer[33]
+      layer[33],
+      layer[34],
+      layer[35],
+      layer[36],
+      layer[37],
+      layer[38],
+      layer[39],
+      layer[40],
+      layer[41],
+      layer[42],
+      layer[43],
+      layer[44],
+      layer[45],
+      layer[46],
     )
   }
 }
