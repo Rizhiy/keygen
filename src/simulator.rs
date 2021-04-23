@@ -107,7 +107,14 @@ pub fn refine<'a>(
     // Test every layout within `num_swaps` swaps of the initial layout.
     let mut best_layouts: LinkedList<BestLayoutsEntry> = LinkedList::new();
     let permutations = layout::LayoutPermutations::new(init_layout, num_swaps);
-    for (i, layout) in permutations.enumerate() {
+    let layout::LayoutShuffleMask(layout::KeyMap(ref mask)) = layout::LAYOUT_MASK;
+    let non_masked_permutations =
+      permutations.filter(|(_, swaps)| swaps.iter().all(|x| mask[*x] == true));
+    for (i, (layout, _swaps)) in non_masked_permutations.enumerate() {
+      // println!(
+      //   "************************ BOOYA {:?}, {} *************************",
+      //   _swaps, i
+      // );
       let penalty = penalty::calculate_penalty(&quartads, len, &layout, penalties, false);
 
       if debug {

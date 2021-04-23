@@ -76,7 +76,7 @@ fn main() {
   // Read layout, if applicable.
   let _layout;
   let layout = match matches.free.get(1) {
-    None => &layout::INIT_LAYOUT,
+    None => &layout::QWERTY_LAYOUT,
     Some(layout_filename) => {
       let mut f = match File::open(layout_filename) {
         Ok(f) => f,

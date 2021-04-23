@@ -46,7 +46,7 @@ pub struct LayoutPermutations {
 pub struct LayoutPosMap([Option<KeyPress>; 128]);
 
 #[derive(Clone)]
-pub struct LayoutShuffleMask(KeyMap<bool>);
+pub struct LayoutShuffleMask(pub KeyMap<bool>);
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Finger {
@@ -256,21 +256,23 @@ pub static ARENSITO_LAYOUT: Layout = Layout(
   ])),
 ); //
 
-// static LAYOUT_MASK: LayoutShuffleMask = LayoutShuffleMask(KeyMap([
-// 	true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  false,
-// 	true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,
-// 	true,  true,  true,  true,  true,  true,  true,  true,  true,  true,
-// 	false]));
+pub static LAYOUT_MASK: LayoutShuffleMask = LayoutShuffleMask(KeyMap([
+  false, true, true, true, true, true, false, false, false, false, false, false, false, //
+  true, true, true, true, true, false, false, false, false, false, false, //
+  true, true, true, true, true, false, false, false, false, false, false, //
+  true, true, true, true, true, false, false, false, false, false, //
+  false, false,
+])); //
 
-static LAYOUT_MASK_SWAP_OFFSETS: [usize; 46] = [
+static LAYOUT_MASK_SWAP_OFFSETS: [usize; 47] = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //
-  1, 1,
+  0, 0,
 ];
 
-static LAYOUT_MASK_NUM_SWAPPABLE: usize = 46;
+static LAYOUT_MASK_NUM_SWAPPABLE: usize = 41;
 
 static KEY_FINGERS: KeyMap<Finger> = KeyMap([
   Finger::Pinky,
@@ -474,10 +476,14 @@ impl Layout {
   }
 
   fn shuffle_position() -> (usize, usize) {
+    let LayoutShuffleMask(KeyMap(ref mask)) = LAYOUT_MASK;
     let mut i = random::<usize>() % LAYOUT_MASK_NUM_SWAPPABLE;
+    while mask[i] == false {
+      i = random::<usize>() % LAYOUT_MASK_NUM_SWAPPABLE;
+    }
     let mut j = random::<usize>() % (LAYOUT_MASK_NUM_SWAPPABLE - 1);
-    if j >= i {
-      j += 1;
+    while mask[j] == false || j == i {
+      j = random::<usize>() % LAYOUT_MASK_NUM_SWAPPABLE;
     }
     i += LAYOUT_MASK_SWAP_OFFSETS[i];
     j += LAYOUT_MASK_SWAP_OFFSETS[j];
@@ -540,29 +546,45 @@ impl LayoutPermutations {
   }
 }
 
-impl Iterator for LayoutPermutations {
-  type Item = Layout;
+fn next_free_swap(e: usize, i: usize) -> Option<usize> {
+  let LayoutShuffleMask(KeyMap(ref mask)) = LAYOUT_MASK;
+  (e..(LAYOUT_MASK_NUM_SWAPPABLE - i)).find(|x| mask[*x])
+}
 
-  fn next(&mut self) -> Option<Layout> {
+impl Iterator for LayoutPermutations {
+  type Item = (Layout, Vec<usize>);
+
+  fn next(&mut self) -> Option<(Layout, Vec<usize>)> {
     let mut some = false;
     let mut idx = 0;
     let mut val = 0;
 
     if self.started {
+      let c = self.swap_idx.clone();
       for (i, e) in self.swap_idx.iter_mut().enumerate() {
-        if *e + 1 < LAYOUT_MASK_NUM_SWAPPABLE - i {
-          *e += 1;
+        // find first non ceiling value and increment it.
+        if let Some(free) = next_free_swap(*e + 1, i) {
+          // println!(
+          //   "iterators: {:?} index: {} current: {} next: {} FREEEEEEE: {} ",
+          //   c.iter(),
+          //   i,
+          //   *e,
+          //   (*e + 1),
+          //   free
+          // );
+          // if safe to increment, do so.
+          *e = free;
           some = true;
           idx = i;
           val = *e;
           break;
         }
       }
-    } else {
+    } else if !self.started {
       self.started = true;
       some = true;
       idx = 1;
-      val = 0;
+      val = next_free_swap(0, 1).unwrap();
     }
 
     if some {
@@ -577,12 +599,16 @@ impl Iterator for LayoutPermutations {
         let ref mut upper = ((layout.1).0).0;
         let swap_left = self.swap_idx[i] + LAYOUT_MASK_SWAP_OFFSETS[self.swap_idx[i]];
         let swap_right = self.swap_idx[i + 1] + LAYOUT_MASK_SWAP_OFFSETS[self.swap_idx[i + 1]];
+        // println!(
+        //   "leftswap {} + offset {} = swap_left {} & swap_right {}",
+        //   self.swap_idx[i], LAYOUT_MASK_SWAP_OFFSETS[self.swap_idx[i]], swap_left, swap_right
+        // );
         lower.swap(swap_left, swap_right);
         upper.swap(swap_left, swap_right);
         i += 2;
       }
 
-      Some(layout)
+      Some((layout, self.swap_idx.clone()))
     } else {
       None
     }
